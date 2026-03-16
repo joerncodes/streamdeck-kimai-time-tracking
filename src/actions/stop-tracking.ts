@@ -55,15 +55,9 @@ export class StopTracking extends SingletonAction {
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			const active = await res.json() as unknown[];
 
-			if (active.length > 0) {
-				await action.setState(1);
-				await action.setTitle("● Active");
-			} else {
-				await action.setState(0);
-				await action.setTitle("");
-			}
+			await action.setState(active.length > 0 ? 1 : 0);
 		} catch {
-			await action.setTitle("");
+			await action.setState(0);
 		}
 	}
 }
