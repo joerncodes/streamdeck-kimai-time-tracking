@@ -21,6 +21,7 @@ export class StopTracking extends SingletonAction {
 
 			if (active.length === 0) {
 				await ev.action.showAlert();
+				await sleep(2000);
 				return;
 			}
 
@@ -31,6 +32,8 @@ export class StopTracking extends SingletonAction {
 				})
 			));
 
+			await ev.action.showOk();
+			await sleep(2000);
 			if (ev.action.isKey()) await this.syncState(ev.action);
 		} catch (e) {
 			streamDeck.logger.error("Failed to stop time tracking:", e);
@@ -53,5 +56,7 @@ export class StopTracking extends SingletonAction {
 		}
 	}
 }
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 type ActionContext = KeyAction;

@@ -110,6 +110,8 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 			});
 
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			await action.showOk();
+			await sleep(2000);
 			await this.poll();
 		} catch (e) {
 			streamDeck.logger.error("Failed to start time tracking:", e);
@@ -131,6 +133,8 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 			});
 
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			await action.showOk();
+			await sleep(2000);
 			await this.poll();
 		} catch (e) {
 			streamDeck.logger.error("Failed to stop time tracking:", e);
@@ -138,6 +142,8 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 		}
 	}
 }
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 function formatElapsed(begin: string, format: GlobalSettings["timeFormat"] = "auto"): string {
 	const elapsed = Math.floor((Date.now() - new Date(begin).getTime()) / 1000);
