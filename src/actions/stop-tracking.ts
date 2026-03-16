@@ -1,4 +1,5 @@
 import streamDeck, { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent } from "@elgato/streamdeck";
+import { fetchActiveTimesheets, GlobalSettings, normalizeUrl } from "../kimai-api";
 
 @action({ UUID: "com.joerncodes.kimai-time-tracking.stop" })
 export class StopTracking extends SingletonAction {
@@ -13,14 +14,10 @@ export class StopTracking extends SingletonAction {
 			return;
 		}
 
-		const base = kimaiUrl.replace(/\/$/, '');
+		const base = normalizeUrl(kimaiUrl);
 
 		try {
-			const res = await fetch(`${base}/api/timesheets/active`, {
-				headers: { "Authorization": `Bearer ${apiToken}` }
-			});
-			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			const active = await res.json() as { id: number }[];
+			const active = await fetchActiveTimesheets(base, apiToken);
 
 			if (active.length === 0) {
 				await ev.action.showAlert();
@@ -49,12 +46,7 @@ export class StopTracking extends SingletonAction {
 		}
 
 		try {
-			const res = await fetch(`${kimaiUrl.replace(/\/$/, '')}/api/timesheets/active`, {
-				headers: { "Authorization": `Bearer ${apiToken}` }
-			});
-			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			const active = await res.json() as unknown[];
-
+			const active = await fetchActiveTimesheets(normalizeUrl(kimaiUrl), apiToken);
 			await action.setState(active.length > 0 ? 1 : 0);
 		} catch {
 			await action.setState(0);
@@ -63,8 +55,3 @@ export class StopTracking extends SingletonAction {
 }
 
 type ActionContext = KeyAction;
-
-type GlobalSettings = {
-	kimaiUrl?: string;
-	apiToken?: string;
-};

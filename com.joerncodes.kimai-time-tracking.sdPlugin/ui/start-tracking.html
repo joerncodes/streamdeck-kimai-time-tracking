@@ -38,6 +38,17 @@
             <span id="token-status" class="status-icon">✓</span>
         </div>
     </sdpi-item>
+    <sdpi-item label="Timer Format">
+        <sdpi-select setting="timeFormat" global>
+            <option value="auto">5:00 / 1:05:00 (auto)</option>
+            <option value="full">00:05:00 (always HH:MM:SS)</option>
+            <option value="verbose">1h 5m 6s</option>
+        </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Label">
+        <sdpi-textfield setting="label" placeholder="Optional label shown above the timer"></sdpi-textfield>
+        <p style="font-size: 11px; color: var(--sdpi-color, #999); margin: 4px 0 0;">The "Title" field above must be empty, otherwise it overrides the timer display.</p>
+    </sdpi-item>
     <sdpi-item label="Project">
         <sdpi-select setting="projectId" id="project-select">
             <option value="">— Select a project —</option>

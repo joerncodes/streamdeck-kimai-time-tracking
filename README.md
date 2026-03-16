@@ -6,8 +6,14 @@ A [Stream Deck](https://www.elgato.com/stream-deck) plugin that lets you start a
 
 | Action | Description |
 |--------|-------------|
-| **Start Tracking** | Start (or toggle) a Kimai time tracking entry |
+| **Start Tracking** | Start (or toggle) a Kimai time tracking entry. Displays elapsed time while running. |
 | **Stop Tracking** | Stop all active Kimai time tracking entries |
+
+### Start Tracking — Label
+
+The property inspector has an optional **Label** field. When set, it is displayed above the running timer on the button (e.g. `My Task\n● 0:05`).
+
+> **Note:** The Stream Deck app's built-in **Title** field (visible in the button customisation panel) overrides the plugin's timer display. Keep it empty — use the **Label** field in the property inspector instead.
 
 ## Requirements
 

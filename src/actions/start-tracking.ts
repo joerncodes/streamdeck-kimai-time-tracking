@@ -1,4 +1,5 @@
 import streamDeck, { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent, WillDisappearEvent } from "@elgato/streamdeck";
+import { ActiveTimesheet, fetchActiveTimesheets, GlobalSettings, normalizeUrl } from "../kimai-api";
 
 @action({ UUID: "com.joerncodes.kimai-time-tracking.increment" })
 export class StartTracking extends SingletonAction<ActionSettings> {
@@ -42,16 +43,12 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 	}
 
 	private async poll(): Promise<void> {
-		const { kimaiUrl, apiToken } = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
+		const { kimaiUrl, apiToken, timeFormat } = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
 		if (!kimaiUrl || !apiToken) return;
 
 		let active: ActiveTimesheet[] = [];
 		try {
-			const res = await fetch(`${kimaiUrl.replace(/\/$/, '')}/api/timesheets/active`, {
-				headers: { "Authorization": `Bearer ${apiToken}` }
-			});
-			if (!res.ok) return;
-			active = await res.json() as ActiveTimesheet[];
+			active = await fetchActiveTimesheets(normalizeUrl(kimaiUrl), apiToken);
 		} catch (e) {
 			streamDeck.logger.error("Poll error:", e);
 			return;
@@ -67,10 +64,11 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 			);
 
 			if (matching) {
-				const elapsed = formatElapsed(matching.begin);
+				const elapsed = formatElapsed(matching.begin, timeFormat);
 				streamDeck.logger.info(`begin=${matching.begin} elapsed=${elapsed}`);
 				await keyAction.setState(1);
-				await keyAction.setTitle(`● ${elapsed}`);
+				const title = settings.label ? `${settings.label}\n● ${elapsed}` : `● ${elapsed}`;
+				await keyAction.setTitle(title);
 				if (settings.timesheetId !== matching.id) {
 					await keyAction.setSettings({ ...settings, timesheetId: matching.id });
 				}
@@ -79,7 +77,7 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 					await keyAction.setSettings({ ...settings, timesheetId: undefined });
 				}
 				await keyAction.setState(0);
-				await keyAction.setTitle("");
+				await keyAction.setTitle(settings.label ?? "");
 			}
 		}
 	}
@@ -98,7 +96,7 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 		}
 
 		try {
-			const res = await fetch(`${kimaiUrl.replace(/\/$/, '')}/api/timesheets`, {
+			const res = await fetch(`${normalizeUrl(kimaiUrl)}/api/timesheets`, {
 				method: "POST",
 				headers: {
 					"Authorization": `Bearer ${apiToken}`,
@@ -127,7 +125,7 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 		}
 
 		try {
-			const res = await fetch(`${kimaiUrl.replace(/\/$/, '')}/api/timesheets/${settings.timesheetId}/stop`, {
+			const res = await fetch(`${normalizeUrl(kimaiUrl)}/api/timesheets/${settings.timesheetId}/stop`, {
 				method: "PATCH",
 				headers: { "Authorization": `Bearer ${apiToken}` }
 			});
@@ -141,33 +139,29 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 	}
 }
 
-function formatElapsed(begin: string): string {
+function formatElapsed(begin: string, format: GlobalSettings["timeFormat"] = "auto"): string {
 	const elapsed = Math.floor((Date.now() - new Date(begin).getTime()) / 1000);
 	const h = Math.floor(elapsed / 3600);
 	const m = Math.floor((elapsed % 3600) / 60);
 	const s = elapsed % 60;
-	if (h > 0) {
-		return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+	const mm = String(m).padStart(2, '0');
+	const ss = String(s).padStart(2, '0');
+
+	switch (format) {
+		case "full":
+			return `${String(h).padStart(2, '0')}:${mm}:${ss}`;
+		case "verbose":
+			return h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+		default: // "auto"
+			return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
 	}
-	return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 type ActionContext = KeyAction<ActionSettings>;
-
-type ActiveTimesheet = {
-	id: number;
-	project: { id: number };
-	activity: { id: number };
-	begin: string;
-};
 
 type ActionSettings = {
 	projectId?: string;
 	activityId?: string;
 	timesheetId?: number;
-};
-
-type GlobalSettings = {
-	kimaiUrl?: string;
-	apiToken?: string;
+	label?: string;
 };

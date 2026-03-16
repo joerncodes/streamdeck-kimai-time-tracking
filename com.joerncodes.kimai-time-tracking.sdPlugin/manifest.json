@@ -6,7 +6,7 @@
 		{
 			"Name": "Start Tracking",
 			"UUID": "com.joerncodes.kimai-time-tracking.increment",
-			"Icon": "imgs/actions/counter/icon",
+			"Icon": "imgs/actions/start-tracking/icon",
 			"Tooltip": "Start or stop a Kimai time tracking entry.",
 			"PropertyInspectorPath": "ui/start-tracking.html",
 			"Controllers": [
@@ -14,11 +14,11 @@
 			],
 			"States": [
 				{
-					"Image": "imgs/actions/counter/key",
+					"Image": "imgs/actions/start-tracking/key",
 					"TitleAlignment": "middle"
 				},
 				{
-					"Image": "imgs/actions/counter/key",
+					"Image": "imgs/actions/start-tracking/key",
 					"TitleAlignment": "middle"
 				}
 			]
@@ -26,7 +26,7 @@
 		{
 			"Name": "Stop Tracking",
 			"UUID": "com.joerncodes.kimai-time-tracking.stop",
-			"Icon": "imgs/actions/counter/icon",
+			"Icon": "imgs/actions/stop-tracking/icon",
 			"Tooltip": "Stop all active Kimai time tracking entries.",
 			"PropertyInspectorPath": "ui/stop-tracking.html",
 			"Controllers": [
@@ -34,11 +34,11 @@
 			],
 			"States": [
 				{
-					"Image": "imgs/actions/counter/key",
+					"Image": "imgs/actions/stop-tracking/key",
 					"TitleAlignment": "middle"
 				},
 				{
-					"Image": "imgs/actions/counter/key",
+					"Image": "imgs/actions/stop-tracking/key-active",
 					"TitleAlignment": "middle"
 				}
 			]
