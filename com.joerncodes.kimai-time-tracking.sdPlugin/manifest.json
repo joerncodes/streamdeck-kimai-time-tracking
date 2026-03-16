@@ -1,0 +1,72 @@
+{
+	"Name": "Kimai Time Tracking",
+	"Version": "0.1.0.0",
+	"Author": "JoernCodes",
+	"Actions": [
+		{
+			"Name": "Start Tracking",
+			"UUID": "com.joerncodes.kimai-time-tracking.increment",
+			"Icon": "imgs/actions/counter/icon",
+			"Tooltip": "Start or stop a Kimai time tracking entry.",
+			"PropertyInspectorPath": "ui/start-tracking.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				},
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Stop Tracking",
+			"UUID": "com.joerncodes.kimai-time-tracking.stop",
+			"Icon": "imgs/actions/counter/icon",
+			"Tooltip": "Stop all active Kimai time tracking entries.",
+			"PropertyInspectorPath": "ui/stop-tracking.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				},
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		}
+	],
+	"GlobalPropertyInspectorPath": "ui/kimai-settings.html",
+	"Category": "Kimai Time Tracking",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"CodePath": "bin/plugin.js",
+	"Description": "A plugin to help you start / stop time tracking entries in Kimai",
+	"Icon": "imgs/plugin/marketplace",
+	"SDKVersion": 3,
+	"Software": {
+		"MinimumVersion": "6.9"
+	},
+	"OS": [
+		{
+			"Platform": "mac",
+			"MinimumVersion": "12"
+		},
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "20",
+		"Debug": "enabled"
+	},
+	"UUID": "com.joerncodes.kimai-time-tracking"
+}

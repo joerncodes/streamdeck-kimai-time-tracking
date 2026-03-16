@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build output
+com.joerncodes.kimai-time-tracking.sdPlugin/bin/
+
+# Logs
+com.joerncodes.kimai-time-tracking.sdPlugin/logs/
+
+# TypeScript
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/settings.json
+*.swp
+*.swo

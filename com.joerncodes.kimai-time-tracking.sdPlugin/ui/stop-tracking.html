@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <title>Stop Tracking Settings</title>
+    <meta charset="utf-8" />
+    <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+    <style>
+        .field-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .field-row sdpi-textfield,
+        .field-row sdpi-password {
+            flex: 1;
+        }
+        .status-icon {
+            font-size: 14px;
+            visibility: hidden;
+            flex-shrink: 0;
+        }
+        .status-icon.ok  { color: #4caf50; visibility: visible; }
+        .status-icon.err { color: #f44336; visibility: visible; }
+    </style>
+</head>
+
+<body>
+    <sdpi-item label="Kimai URL">
+        <div class="field-row">
+            <sdpi-textfield setting="kimaiUrl" placeholder="https://kimai.example.com" global required></sdpi-textfield>
+            <span id="url-status" class="status-icon">✓</span>
+        </div>
+    </sdpi-item>
+    <sdpi-item label="API Token">
+        <div class="field-row">
+            <sdpi-password setting="apiToken" placeholder="Your Kimai API token" global required></sdpi-password>
+            <span id="token-status" class="status-icon">✓</span>
+        </div>
+    </sdpi-item>
+
+    <script>
+        function getCredentials() {
+            const kimaiUrl = document.querySelector('sdpi-textfield[setting="kimaiUrl"]')?.value?.trim()?.replace(/\/$/, '');
+            const apiToken = document.querySelector('sdpi-password[setting="apiToken"]')?.value?.trim();
+            return { kimaiUrl, apiToken };
+        }
+
+        function setCredentialStatus(ok) {
+            const icon = ok ? '✓' : '✗';
+            const cls  = ok ? 'ok' : 'err';
+            for (const id of ['url-status', 'token-status']) {
+                const el = document.getElementById(id);
+                el.textContent = icon;
+                el.className = `status-icon ${cls}`;
+            }
+        }
+
+        function clearCredentialStatus() {
+            for (const id of ['url-status', 'token-status']) {
+                document.getElementById(id).className = 'status-icon';
+            }
+        }
+
+        async function validateCredentials() {
+            const { kimaiUrl, apiToken } = getCredentials();
+            if (!kimaiUrl || !apiToken) {
+                clearCredentialStatus();
+                return;
+            }
+
+            try {
+                const res = await fetch(`${kimaiUrl}/api/timesheets/active`, {
+                    headers: { 'Authorization': `Bearer ${apiToken}` }
+                });
+                setCredentialStatus(res.ok);
+            } catch {
+                setCredentialStatus(false);
+            }
+        }
+
+        window.addEventListener('load', () => setTimeout(validateCredentials, 500));
+
+        let credentialDebounce;
+        document.addEventListener('input', (e) => {
+            const setting = e.target?.getAttribute?.('setting');
+            if (setting === 'kimaiUrl' || setting === 'apiToken') {
+                clearCredentialStatus();
+                clearTimeout(credentialDebounce);
+                credentialDebounce = setTimeout(validateCredentials, 800);
+            }
+        });
+    </script>
+</body>
+
+</html>

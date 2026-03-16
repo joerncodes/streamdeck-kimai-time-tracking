@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <title>Kimai Settings</title>
+    <meta charset="utf-8" />
+    <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+    <style>
+        .field-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .field-row sdpi-textfield,
+        .field-row sdpi-password {
+            flex: 1;
+        }
+        .status-icon {
+            font-size: 14px;
+            visibility: hidden;
+            flex-shrink: 0;
+        }
+        .status-icon.ok  { color: #4caf50; visibility: visible; }
+        .status-icon.err { color: #f44336; visibility: visible; }
+    </style>
+</head>
+
+<body>
+    <sdpi-item label="Kimai URL">
+        <div class="field-row">
+            <sdpi-textfield setting="kimaiUrl" placeholder="https://kimai.example.com" global required></sdpi-textfield>
+            <span id="url-status" class="status-icon">✓</span>
+        </div>
+    </sdpi-item>
+    <sdpi-item label="API Token">
+        <div class="field-row">
+            <sdpi-password setting="apiToken" placeholder="Your Kimai API token" global required></sdpi-password>
+            <span id="token-status" class="status-icon">✓</span>
+        </div>
+    </sdpi-item>
+    <sdpi-item label="Project">
+        <sdpi-select setting="projectId" id="project-select">
+            <option value="">— Select a project —</option>
+        </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Activity">
+        <sdpi-select setting="activityId" id="activity-select">
+            <option value="">— Select a project first —</option>
+        </sdpi-select>
+    </sdpi-item>
+
+    <script>
+        function getCredentials() {
+            const kimaiUrl = document.querySelector('sdpi-textfield[setting="kimaiUrl"]')?.value?.trim()?.replace(/\/$/, '');
+            const apiToken = document.querySelector('sdpi-password[setting="apiToken"]')?.value?.trim();
+            return { kimaiUrl, apiToken };
+        }
+
+        function setCredentialStatus(ok) {
+            const icon = ok ? '✓' : '✗';
+            const cls  = ok ? 'ok' : 'err';
+            for (const id of ['url-status', 'token-status']) {
+                const el = document.getElementById(id);
+                el.textContent = icon;
+                el.className = `status-icon ${cls}`;
+            }
+        }
+
+        function clearCredentialStatus() {
+            for (const id of ['url-status', 'token-status']) {
+                document.getElementById(id).className = 'status-icon';
+            }
+        }
+
+        async function populateProjects() {
+            const { kimaiUrl, apiToken } = getCredentials();
+            if (!kimaiUrl || !apiToken) {
+                clearCredentialStatus();
+                return;
+            }
+
+            const select = document.getElementById('project-select');
+            const previousValue = select.value;
+
+            try {
+                const res = await fetch(`${kimaiUrl}/api/projects?visible=1`, {
+                    headers: { 'Authorization': `Bearer ${apiToken}` }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const projects = await res.json();
+
+                setCredentialStatus(true);
+
+                select.innerHTML = '<option value="">— Select a project —</option>';
+                for (const p of projects) {
+                    const opt = document.createElement('option');
+                    opt.value = String(p.id);
+                    opt.textContent = p.name;
+                    select.appendChild(opt);
+                }
+                if (previousValue) {
+                    select.value = previousValue;
+                    await populateActivities(previousValue);
+                }
+            } catch (e) {
+                console.error('Failed to fetch Kimai projects', e);
+                setCredentialStatus(false);
+                select.innerHTML = '<option value="">Failed to load — check URL and token</option>';
+            }
+        }
+
+        async function populateActivities(projectId) {
+            const { kimaiUrl, apiToken } = getCredentials();
+            const select = document.getElementById('activity-select');
+
+            if (!kimaiUrl || !apiToken || !projectId) {
+                select.innerHTML = '<option value="">— Select a project first —</option>';
+                return;
+            }
+
+            const previousValue = select.value;
+
+            try {
+                const res = await fetch(`${kimaiUrl}/api/activities?project=${projectId}&visible=1`, {
+                    headers: { 'Authorization': `Bearer ${apiToken}` }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const activities = await res.json();
+
+                select.innerHTML = '<option value="">— Select an activity —</option>';
+                for (const a of activities) {
+                    const opt = document.createElement('option');
+                    opt.value = String(a.id);
+                    opt.textContent = a.name;
+                    select.appendChild(opt);
+                }
+                if (previousValue) select.value = previousValue;
+            } catch (e) {
+                console.error('Failed to fetch Kimai activities', e);
+                select.innerHTML = '<option value="">Failed to load activities</option>';
+            }
+        }
+
+        // Wait for sdpi-components to receive settings from Stream Deck, then fetch
+        window.addEventListener('load', () => setTimeout(populateProjects, 500));
+
+        // Re-fetch projects when credentials change.
+        // Uses 'input' (not 'change') because input is a composed event and crosses shadow DOM boundaries.
+        let credentialDebounce;
+        document.addEventListener('input', (e) => {
+            const setting = e.target?.getAttribute?.('setting');
+            if (setting === 'kimaiUrl' || setting === 'apiToken') {
+                clearCredentialStatus();
+                clearTimeout(credentialDebounce);
+                credentialDebounce = setTimeout(populateProjects, 800);
+            }
+        });
+
+        // Re-fetch activities when project changes
+        document.getElementById('project-select').addEventListener('change', (e) => populateActivities(e.target.value));
+    </script>
+</body>
+
+</html>
