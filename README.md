@@ -1,30 +1,47 @@
 # Kimai Time Tracking for Stream Deck
 
-A [Stream Deck](https://www.elgato.com/stream-deck) plugin that lets you **start** and **stop** [Kimai](https://www.kimai.org/) time tracking entries from your Stream Deck — no need to switch to the browser.
+A [Stream Deck](https://www.elgato.com/stream-deck) plugin that lets you **start** and **stop** [Kimai](https://www.kimai.org/) time tracking entries right from your Stream Deck.
+
+![Start Tracking button showing elapsed time](screenshots/screenshot-running.jpg)
+
+Kimai is an open-source web-based time tracking application that makes it easy to track work across projects and activities, manage timesheets, and generate reports. It's great, you should host it yourself and use it! 
 
 ## Features
 
 - **Start Tracking** — Start a timer with a chosen project and activity. Shows elapsed time on the button (e.g. `My Task` + `● 0:05`). Optional label and timer format (auto / HH:MM:SS / verbose).
-- **Stop Tracking** — Stop all active Kimai time entries with one press. Button state reflects whether any timer is running.
-- **Global settings** — Configure Kimai URL and API token once; all actions use them.
-- **Property inspector** — Per-action project/activity selection and optional label for Start Tracking.
+- **Stop Tracking** — Stop all active Kimai time entries with one press. 
+- **Global settings** — Configure Kimai URL and API token once; can be used by all actions.
+- **Property inspector** — Per-action project/activity selection for `Start Tracking`.
 
 ## Requirements
 
 - **Stream Deck** software 6.9+
 - **macOS** 12+ or **Windows** 10+
-- A **Kimai** instance with API access (API token from your user profile)
+- A **Kimai** instance with API access (you can generate an API token from your user profile)
 
 ## Installation
 
-1. Install the plugin via the Stream Deck app (e.g. **More actions** → search for “Kimai”) **or** copy the `com.joerncodes.kimai-time-tracking.sdPlugin` folder into your Stream Deck plugins directory.
-2. Add **Start Tracking** and/or **Stop Tracking** to a key. Open the key’s settings (gear icon) to configure.
+**From the Marketplace:** Install via the Stream Deck app.
+
+**From source:**
+
+1. Clone this repository, then build the plugin:
+   ```bash
+   npm install
+   npm run build
+   ```
+2. Copy the `com.joerncodes.kimai-time-tracking.sdPlugin` folder into your Stream Deck plugins directory:
+   - **macOS:** `~/Library/Application Support/com.elgato.StreamDeck/Plugins/`
+   - **Windows:** `%APPDATA%\Elgato\StreamDeck\Plugins\`
+3. Restart the Stream Deck app if it is already running.
+
+Then, just add **Start Tracking** and/or **Stop Tracking** to a key! Open the key’s settings to configure your access and select a project / activity.
 
 ## Configuration
 
 ### Global settings
 
-Open **any** action’s property inspector and set (or use the plugin’s global settings if available):
+Open **any** action and set:
 
 | Setting     | Description |
 |------------|-------------|
@@ -32,6 +49,8 @@ Open **any** action’s property inspector and set (or use the plugin’s global
 | **API Token** | Your Kimai API token. In Kimai: **Profile** → **API** to create one. |
 
 These are shared by all Kimai actions in this plugin.
+
+![Property inspector showing Kimai URL and API token fields](screenshots/screenshot-initial.jpg)
 
 ### Start Tracking
 
@@ -41,6 +60,8 @@ These are shared by all Kimai actions in this plugin.
 | **Timer format** | How elapsed time is displayed: **auto** (e.g. `5:00` / `1:05:00`), **HH:MM:SS**, or **verbose** (e.g. `1h 5m 6s`). |
 | **Project**    | Default project for new time entries. |
 | **Activity**   | Default activity (depends on selected project). |
+
+![Start Tracking button with label and verbose timer format](screenshots/screenshot-running-label.jpg)
 
 ### Stop Tracking
 
@@ -103,6 +124,10 @@ com.joerncodes.kimai-time-tracking.sdPlugin/
 ```
 
 Built with **TypeScript**, **Rollup**, and the official [Elgato Stream Deck SDK](https://developer.elgato.com/documentation/stream-deck/) (v2).
+
+## Support
+
+Issues, questions, or feedback: [code@joernmeyer.name](mailto:code@joernmeyer.name)
 
 ## License
 

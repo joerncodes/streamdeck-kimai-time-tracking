@@ -3,6 +3,7 @@ node_modules/
 
 # Build output
 com.joerncodes.kimai-time-tracking.sdPlugin/bin/
+*.streamDeckPlugin
 
 # Logs
 com.joerncodes.kimai-time-tracking.sdPlugin/logs/

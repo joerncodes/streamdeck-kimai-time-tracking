@@ -1,6 +1,6 @@
 {
 	"Name": "Kimai Time Tracking",
-	"Version": "0.1.0.0",
+	"Version": "1.0.0.0",
 	"Author": "JoernCodes",
 	"Actions": [
 		{
@@ -44,7 +44,6 @@
 			]
 		}
 	],
-	"GlobalPropertyInspectorPath": "ui/kimai-settings.html",
 	"Category": "Kimai Time Tracking",
 	"CategoryIcon": "imgs/plugin/category-icon",
 	"CodePath": "bin/plugin.js",
@@ -65,8 +64,7 @@
 		}
 	],
 	"Nodejs": {
-		"Version": "20",
-		"Debug": "enabled"
+		"Version": "20"
 	},
 	"UUID": "com.joerncodes.kimai-time-tracking"
 }
