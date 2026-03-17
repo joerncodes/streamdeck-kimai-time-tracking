@@ -127,7 +127,7 @@ Built with **TypeScript**, **Rollup**, and the official [Elgato Stream Deck SDK]
 
 ## Support
 
-Issues, questions, or feedback: [code@joernmeyer.name](mailto:code@joernmeyer.name)
+Please feel free to open an issue here! I'd be happy to help you or add features to the tool!
 
 ## License
 
