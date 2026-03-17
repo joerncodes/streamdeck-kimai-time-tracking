@@ -1,15 +1,7 @@
-export type GlobalSettings = {
-	kimaiUrl?: string;
-	apiToken?: string;
-	timeFormat?: "auto" | "full" | "verbose";
-};
+import type { ActiveTimesheet } from "./ActiveTimesheet";
+import type { GlobalSettings } from "./GlobalSettings";
 
-export type ActiveTimesheet = {
-	id: number;
-	project: { id: number };
-	activity: { id: number };
-	begin: string;
-};
+export type { ActiveTimesheet, GlobalSettings };
 
 export function normalizeUrl(url: string): string {
 	return url.replace(/\/$/, '');

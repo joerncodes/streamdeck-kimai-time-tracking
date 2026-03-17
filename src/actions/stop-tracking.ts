@@ -1,4 +1,5 @@
-import streamDeck, { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent } from "@elgato/streamdeck";
+import streamDeck, { action, KeyDownEvent, SingletonAction, WillAppearEvent } from "@elgato/streamdeck";
+import type { ActionContext } from "./StopTracking";
 import { fetchActiveTimesheets, GlobalSettings, normalizeUrl } from "../kimai-api";
 
 @action({ UUID: "com.joerncodes.kimai-time-tracking.stop" })
@@ -20,8 +21,7 @@ export class StopTracking extends SingletonAction {
 			const active = await fetchActiveTimesheets(base, apiToken);
 
 			if (active.length === 0) {
-				await ev.action.showAlert();
-				await sleep(2000);
+				await showFor(() => ev.action.showAlert(), 2000);
 				return;
 			}
 
@@ -32,8 +32,7 @@ export class StopTracking extends SingletonAction {
 				})
 			));
 
-			await ev.action.showOk();
-			await sleep(2000);
+			await showFor(() => ev.action.showOk(), 2000);
 			if (ev.action.isKey()) await this.syncState(ev.action);
 		} catch (e) {
 			streamDeck.logger.error("Failed to stop time tracking:", e);
@@ -59,4 +58,10 @@ export class StopTracking extends SingletonAction {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-type ActionContext = KeyAction;
+async function showFor(fn: () => Promise<void>, ms: number): Promise<void> {
+	const end = Date.now() + ms;
+	while (Date.now() < end) {
+		await fn();
+		await sleep(100);
+	}
+}

@@ -1,10 +1,12 @@
 import streamDeck, { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent, WillDisappearEvent } from "@elgato/streamdeck";
+import type { ActionContext, ActionSettings } from "./ActionSettings";
 import { ActiveTimesheet, fetchActiveTimesheets, GlobalSettings, normalizeUrl } from "../kimai-api";
 
 @action({ UUID: "com.joerncodes.kimai-time-tracking.increment" })
 export class StartTracking extends SingletonAction<ActionSettings> {
 	private pollingInterval: ReturnType<typeof setInterval> | null = null;
 	private readonly trackedActions = new Map<string, KeyAction<ActionSettings>>();
+	private feedbackActive = false;
 
 	override async onWillAppear(ev: WillAppearEvent<ActionSettings>): Promise<void> {
 		if (!ev.action.isKey()) return;
@@ -43,6 +45,7 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 	}
 
 	private async poll(): Promise<void> {
+		if (this.feedbackActive) return;
 		const { kimaiUrl, apiToken, timeFormat } = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
 		if (!kimaiUrl || !apiToken) return;
 
@@ -110,8 +113,9 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 			});
 
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			await action.showOk();
-			await sleep(2000);
+			this.feedbackActive = true;
+			await showFor(() => action.showOk(), 2000);
+			this.feedbackActive = false;
 			await this.poll();
 		} catch (e) {
 			streamDeck.logger.error("Failed to start time tracking:", e);
@@ -133,8 +137,9 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 			});
 
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			await action.showOk();
-			await sleep(2000);
+			this.feedbackActive = true;
+			await showFor(() => action.showOk(), 2000);
+			this.feedbackActive = false;
 			await this.poll();
 		} catch (e) {
 			streamDeck.logger.error("Failed to stop time tracking:", e);
@@ -144,6 +149,14 @@ export class StartTracking extends SingletonAction<ActionSettings> {
 }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function showFor(fn: () => Promise<void>, ms: number): Promise<void> {
+	const end = Date.now() + ms;
+	while (Date.now() < end) {
+		await fn();
+		await sleep(100);
+	}
+}
 
 function formatElapsed(begin: string, format: GlobalSettings["timeFormat"] = "auto"): string {
 	const elapsed = Math.floor((Date.now() - new Date(begin).getTime()) / 1000);
@@ -162,12 +175,3 @@ function formatElapsed(begin: string, format: GlobalSettings["timeFormat"] = "au
 			return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
 	}
 }
-
-type ActionContext = KeyAction<ActionSettings>;
-
-type ActionSettings = {
-	projectId?: string;
-	activityId?: string;
-	timesheetId?: number;
-	label?: string;
-};
